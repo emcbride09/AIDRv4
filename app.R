@@ -58,6 +58,8 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(top = 10, right = 5,
                      
+                     
+                     
                      sliderInput("daterange", "Select Week Starting", 
                                  as.Date(min(accleddata$event_date)), 
                                  as.Date(max(accleddata$event_date)),
@@ -121,9 +123,12 @@ server <- function(input, output, session) {
         langs %>%
             filter(Tweet.date == input$daterange[1])
     })
+?colorNumeric
     
 #palette
-pal <- colorNumeric("Blues", domain = aidr_map_data$Tweets)
+pal <- colorBin(palette = "Blues", domain = aidr_map_data$Tweets, na.color = "grey3", 
+                bins = 4, pretty = TRUE
+                    )
 
 #leaflet render
     output$myheatmap <- renderLeaflet({
@@ -142,7 +147,8 @@ pal <- colorNumeric("Blues", domain = aidr_map_data$Tweets)
                              addLegend(pal = pal,
                                        values = aidr_map_data$Tweets,
                                        position = "bottomright",
-                                       title = "Tweets")
+                                       title = "Tweets",
+                                       )
         
        
         
@@ -177,8 +183,8 @@ pal <- colorNumeric("Blues", domain = aidr_map_data$Tweets)
 #mybarplot   
     output$plot <- renderPlot({
         ggplot(reactive_plot_data(), aes(group, fill = Language)) + 
-            geom_bar(position = "fill", width = 0.2) + 
-            scale_fill_manual(values = c('#053C5E', '#25A18E', '#388697', '#388374'), 
+            geom_bar(position = "fill", width = 0.5) + 
+            scale_fill_manual(values = c('#47A025', '#9A031E', '#064789'), 
                               labels = c('Arabic', 'English', 'French')
             ) +
             labs(title = '% Breakdown of Tweet language', x = 'Language Breakdown', y = "") + 
