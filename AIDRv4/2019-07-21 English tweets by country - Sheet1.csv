@@ -1,0 +1,140 @@
+Country or area name,ISO3,ISO2,Tweets,Percentage
+United States of America,USA,us,4359,46.25%
+United Kingdom,GBR,gb,1198,12.71%
+India,IND,in,758,8.04%
+Canada,CAN,ca,466,4.94%
+Nigeria,NGA,ng,375,3.98%
+Malaysia,MYS,my,297,3.15%
+Australia,AUS,au,233,2.47%
+Ireland,IRL,ie,208,2.21%
+Indonesia,IDN,id,161,1.71%
+Philippines,PHL,ph,99,1.05%
+France,FRA,fr,98,1.04%
+South Africa,ZAF,za,71,0.75%
+Germany,DEU,de,65,0.69%
+Kenya,KEN,ke,54,0.57%
+Pakistan,PAK,pk,51,0.54%
+Spain,ESP,es,49,0.52%
+Brazil,BRA,br,40,0.42%
+Italy,ITA,it,39,0.41%
+Netherlands,NLD,nl,34,0.36%
+Republic of Korea,KOR,kr,33,0.35%
+Laos,LAO,la,30,0.32%
+Belgium,BEL,be,28,0.30%
+Sweden,SWE,se,26,0.28%
+Mexico,MEX,mx,25,0.27%
+Portugal,PRT,pt,25,0.27%
+Singapore,SGP,sg,23,0.24%
+Turkey,TUR,tr,23,0.24%
+Switzerland,CHE,ch,22,0.23%
+New Zealand,NZL,nz,22,0.23%
+Afghanistan,AFG,af,21,0.22%
+Thailand,THA,th,21,0.22%
+Colombia,COL,co,20,0.21%
+United Arab Emirates,ARE,ae,19,0.20%
+Somalia,SOM,so,19,0.20%
+Israel,ISR,il,16,0.17%
+Japan,JPN,jp,16,0.17%
+Poland,POL,pl,16,0.17%
+Argentina,ARG,ar,15,0.16%
+China,CHN,cn,14,0.15%
+Egypt,EGY,eg,14,0.15%
+Austria,AUT,at,13,0.14%
+Norway,NOR,no,13,0.14%
+Chile,CHL,cl,12,0.13%
+Saudi Arabia,SAU,sa,11,0.12%
+Myanmar,MMR,mm,10,0.11%
+Ghana,GHA,gh,9,0.10%
+Iran (Islamic Republic of),IRN,ir,9,0.10%
+Russian Federation,RUS,ru,9,0.10%
+Viet Nam,VNM,vn,9,0.10%
+Denmark,DNK,dk,8,0.08%
+Finland,FIN,fi,8,0.08%
+Sri Lanka,LKA,lk,8,0.08%
+Peru,PER,pe,7,0.07%
+Romania,ROU,ro,7,0.07%
+Bahamas,BHS,bs,6,0.06%
+Ecuador,ECU,ec,6,0.06%
+Greece,GRC,gr,5,0.05%
+Taiwan,TWN,tw,5,0.05%
+Uganda,UGA,ug,5,0.05%
+Venezuela,VEN,ve,5,0.05%
+Yemen,YEM,ye,5,0.05%
+Jersey,JEY,je,4,0.04%
+Jamaica,JAM,jm,4,0.04%
+Oman,OMN,om,4,0.04%
+Panama,PAN,pa,4,0.04%
+Zambia,ZMB,zm,4,0.04%
+Zimbabwe,ZWE,zw,4,0.04%
+Azerbaijan,AZE,az,3,0.03%
+Bahrain,BHR,bh,3,0.03%
+Brunei Darussalam,BRN,bn,3,0.03%
+Bolivia (Plurinational State of),BOL,bo,3,0.03%
+Costa Rica,CRI,cr,3,0.03%
+Fiji,FJI,fj,3,0.03%
+Hungary,HUN,hu,3,0.03%
+Jordan,JOR,jo,3,0.03%
+Democratic People's Republic of Korea,PRK,kp,3,0.03%
+Liberia,LBR,lr,3,0.03%
+Luxembourg,LUX,lu,3,0.03%
+Maldives,MDV,mv,3,0.03%
+Qatar,QAT,qa,3,0.03%
+Slovenia,SVN,si,3,0.03%
+South Sudan,SSD,ss,3,0.03%
+United Republic of Tanzania,TZA,tz,3,0.03%
+Ukraine,UKR,ua,3,0.03%
+Uruguay,URY,uy,3,0.03%
+Kosovo,,xk,3,0.03%
+Barbados,BRB,bb,2,0.02%
+Bangladesh,BGD,bd,2,0.02%
+Bulgaria,BGR,bg,2,0.02%
+Botswana,BWA,bw,2,0.02%
+Belarus,BLR,by,2,0.02%
+Democratic Republic of the Congo,COD,cd,2,0.02%
+Cameroon,CMR,cm,2,0.02%
+Czech Republic,CZE,cz,2,0.02%
+Dominican Republic,DOM,do,2,0.02%
+Guatemala,GTM,gt,2,0.02%
+"China, Hong Kong Special Administrative Region",HKG,hk,2,0.02%
+Haiti,HTI,ht,2,0.02%
+Lebanon,LBN,lb,2,0.02%
+Monaco,MCO,mc,2,0.02%
+Republic of Moldova,MDA,md,2,0.02%
+State of Palestine,PSE,ps,2,0.02%
+Sierra Leone,SLE,sl,2,0.02%
+El Salvador,SLV,sv,2,0.02%
+Bosnia and Herzegovina,BIH,ba,1,0.01%
+Burkina Faso,BFA,bf,1,0.01%
+Benin,BEN,bj,1,0.01%
+Bhutan,BTN,bt,1,0.01%
+Cyprus,CYP,cy,1,0.01%
+Dominica,DMA,dm,1,0.01%
+Algeria,DZA,dz,1,0.01%
+Estonia,EST,ee,1,0.01%
+Ethiopia,ETH,et,1,0.01%
+Honduras,HND,hn,1,0.01%
+Croatia,HRV,hr,1,0.01%
+Isle of Man,IMN,im,1,0.01%
+Iraq,IRQ,iq,1,0.01%
+Iceland,ISL,is,1,0.01%
+Cambodia,KHM,kh,1,0.01%
+Kazakhstan,KAZ,kz,1,0.01%
+Lesotho,LSO,ls,1,0.01%
+Lithuania,LTU,lt,1,0.01%
+Latvia,LVA,lv,1,0.01%
+Libya,LBY,ly,1,0.01%
+Mali,MLI,ml,1,0.01%
+Malta,MLT,mt,1,0.01%
+Malawi,MWI,mw,1,0.01%
+Niger,NER,ne,1,0.01%
+Nepal,NPL,np,1,0.01%
+Serbia,SRB,rs,1,0.01%
+Rwanda,RWA,rw,1,0.01%
+Seychelles,SYC,sc,1,0.01%
+Sudan,SDN,sd,1,0.01%
+Slovakia,SVK,sk,1,0.01%
+Suriname,SUR,sr,1,0.01%
+Syrian Arab Republic,SYR,sy,1,0.01%
+Tunisia,TUN,tn,1,0.01%
+Tonga,TON,to,1,0.01%
+Uzbekistan,UZB,uz,1,0.01%

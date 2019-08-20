@@ -1,0 +1,13 @@
+name: AIDRv4
+title: AIDRv4
+username:
+account: emcbride
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1091304
+bundleId: 2337438
+url: https://emcbride.shinyapps.io/AIDRv4/
+when: 1566303379.23721
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .httr-oauth|.httr-oauth-SUSPENDED
