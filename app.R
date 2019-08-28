@@ -1,12 +1,14 @@
 require(shinyWidgets)
-library(shiny)
+require(shiny)
 require(tidyverse)
 require(httr)
-library(sf)
+require(sf)
 require(rgdal)
 require(leaflet)
-library(leaflet.extras)
-library(maps)
+require(leaflet.extras)
+require(maps)
+require(shinycssloaders)
+require(shinyjs)
 
 #replace data scripts in both ui and server
 
@@ -25,7 +27,6 @@ accleddata$fatalities <- as.numeric(as.character(accleddata$fatalities))
 accleddata$event_date <- lubridate::floor_date(accleddata$event_date, "week")
 accleddata <- accleddata %>% filter(event_date >= as.Date('2019-07-01'))
 
-
 ###AIDR data
 aidr <- read.csv("Education insecurity tweet counts - Weekly by language.csv")
 
@@ -42,8 +43,6 @@ aidr_content <- aidr_content %>% filter(Tweet.date >= as.Date('2019-07-01'))
 
 aidr_content$group <- as.factor(1)
 
-
-
 #language data
 
 # langs <- read.csv("2019-07-29 education insecurity tweet counts - Sheet1.csv")  %>% 
@@ -51,43 +50,74 @@ aidr_content$group <- as.factor(1)
 
 #shapefiles
 # world <- sf::read_sf(dsn ='TM_WORLD_BORDERS-0.3')
-# 
+
 # aidr_map_data <- world %>% left_join(aidr_content, by = 'ISO3')
 
 #_________________________________app
 #bootstrap and div(class outer) make it full screen
 
-ui <- bootstrapPage(div(class = "outer",
+
+ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
+    tabPanel("Interactive Map",
+    bootstrapPage(
+        div(class = "outer",
     tags$style(type = "text/css", ".outer {position: fixed; top: 41px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0}"),
     #titlePanel(title = "Attacks Against Education - Data from AIDR and ACLED"),
     leafletOutput("myheatmap", height = "100%", width = "100%"),
-    absolutePanel(top = 10, 
+    absolutePanel(bottom = 15,
+                  left = 5,
+                  height = 300,
+                  width = 200,
+                  id = 'logop',
+                  id="controls",
+                  style="z-index:500; background-color: rgba(0,0,0,0); border:0;;",
+                  class = "panel panel-default",
+                  draggable = FALSE,
+                  
+                  h5("Powered by:"),
+                  img(src = 'hdx.png', height = 50, width = 150), 
+                  img(src = 'aidr_logo_300h.png', height = 100, width = 190),
+                  img(src = 'eaa.png', height = 80, width = 160)),
+    fillPage(absolutePanel(top = 45, 
                   right = 5,
                   height = 500,
                   width = 400,
                   id="controls",
-                  style="z-index:500;",
+                  style="z-index:500; background-color: rgba(255,255,255,1); border:0",
                   class = "panel panel-default",
-                  draggable = TRUE,
+                  draggable = FALSE,
                   
-                  h3("Week and Tweet Breakdowns", size = 16),
+                  h4("Add Data Layers", size = 16, align = 'center'),
+                  radioButtons("datarad", label = "", choices = c('ACLED', 'AIDR'), inline = TRUE),
                   
+                  h4("Week and Tweet Breakdowns", size = 16, align = 'center'),
+                  # switchInput(inputId = "switch", value = TRUE),
                   
-                  
-                  sliderInput("daterange", "Select Week Starting", 
+            
+                  sliderInput(ticks = TRUE, "daterange", "",
+                              
+                                
                               as.Date(min(accleddata$event_date)), 
                               as.Date(max(accleddata$event_date)),
                               value = min(accleddata$event_date), 
                               step = 7,
-                              animate = animationOptions(interval = 1000, loop = TRUE)),
+                              animate = animationOptions(interval = 1000, loop = TRUE),
+                              width = "100%"),
+                  
                   plotOutput("plot", width = 400, height = 200),
-                  plotOutput("Barplot", width = 400, height = 400))))
+                  
+                  plotOutput("Barplot", width = 400, height = 400)
+                  ))
+    ))),
+    tabPanel("AIDR Data", dataTableOutput("AIDR_dt")),
+    tabPanel("ACLED Data", dataTableOutput("ACLED_dt"))
+    ))
+
 
 
 # server
 server <- function(input, output, session) {
-    
-    ##reactive statements
+         ##reactive statements
     
     reactive_data_chrono <- reactive({
         accleddata %>% 
@@ -111,41 +141,28 @@ server <- function(input, output, session) {
 #                 bins = 4, pretty = TRUE
 #                     )
 
+    
 #leaflet render
     output$myheatmap <- renderLeaflet({
         leaflet() %>% 
         addProviderTiles(provider = "OpenStreetMap.HOT") %>% 
-            setView(9.7382679, 40.3489054, zoom = 3)
-        #%>% 
-        # addHeatmap(data = accleddata, 
-        #            lat = latitude,
-        #            lng = longitude,
-        #            radius = 15, 
-        #            blur = 25) %>%
-        #     popup = ~paste("Country:", country,
-        #                    "<br/>",
-        #                    "Event:", notes)
+            setView(30.7382679, 15.3489054, zoom = 3) 
+        
     })
+    
 #observe statement needs session    
     observe({
         leafletProxy("myheatmap", session, data = reactive_data_chrono()) %>%
             clearHeatmap() %>%
-            addHeatmap(radius = 25, blur = 35) 
-        
-        # %>% 
-            # popup = ~paste("Country:", country,
-            # "<br/>",
-            # "Event:", notes) %>% 
-             # fitBounds(lng1 = ~min(longitude), lat1 = ~min(latitude),
-             #           lng2 = ~max(longitude), lat2 = ~max(latitude))
-        
+            addHeatmap(radius = 25, blur = 35)
     })
     
 
 #mybarplots   
     output$plot <- renderPlot({
-        ggplot(reactive_plot_data(), aes(group, fill = Language)) + 
-            geom_bar(position = "fill", width = 0.5) + 
+        ggplot(reactive_plot_data(), 
+               aes(group, Relevant.tweets, fill = Language)) + 
+            geom_col(position = "fill", width = 0.2) + 
             scale_fill_manual(values = c('#47A025', '#9A031E', '#064789'), 
                               labels = c('Arabic', 'English', 'French')
             ) +
@@ -156,12 +173,12 @@ server <- function(input, output, session) {
                 panel.background = element_blank(),
                 axis.text.y = element_blank(),
                 axis.title.y = element_blank(),
-                plot.title = element_text(family = 'Gotham', size = 20, vjust = -5),
+                plot.title = element_text(family = 'Gotham', size = 14, vjust = -5, hjust = 0.5),
                 legend.title = element_blank(),
                 legend.position = "none",
                 legend.spacing.x = unit(0.2, 'cm'),
                 #axis.title.x = element_blank(),
-                axis.text.x = element_text(size = 12, family = 'Gotham')
+                axis.text.x = element_text(size = 8, family = 'Gotham', color = 'black')
                 
             ) + guides(fill = guide_legend(reverse = TRUE))
         
@@ -177,28 +194,30 @@ server <- function(input, output, session) {
             theme(
                 plot.background = element_blank(),
                 panel.background = element_blank(),
-                plot.title = element_text(family = 'Gotham', size = 20),
+                plot.title = element_text(family = 'Gotham', size = 14, hjust = 0.5),
                 legend.position = "bottom",
                 legend.spacing.x = unit(0.2, 'cm'),
-                axis.text.x = element_text(size = 12, family = 'Gotham'),
-                axis.title = element_text(size = 16, family = 'Gotham')
+                axis.text.x = element_text(size = 8, family = 'Gotham'),
+                axis.title = element_text(size = 8, family = 'Gotham')
 
             ) + guides(fill = guide_legend(reverse = TRUE))
     })
     
+    output$AIDR_dt <- renderDataTable({aidr_content})
     
-
+    output$ACLED_dt <- renderDataTable({accleddata})
     
-    
-    
-    
-    
-    
-    
+    output$aidrimg <- renderImage({
+      outfile <- tempfile(fileext = 'aidr_logo_300h.png')
+    })
 }
 
 
 # Run the application 
-# shinyApp(ui = ui, server = server)
 
-runGitHub( "<AIDRv4>", "<emcbride09>")
+shinyAppDir(".")
+
+shinyApp(ui = ui, server = server)
+
+#runGitHub( "AIDRv4", "emcbride09")
+
