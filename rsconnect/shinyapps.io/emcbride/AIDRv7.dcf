@@ -1,0 +1,12 @@
+name: AIDRv7
+title: AIDRv7
+username:
+account: emcbride
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1216012
+bundleId: 2426490
+url: https://emcbride.shinyapps.io/AIDRv7/
+when: 1568894515.69517
+asMultiple: FALSE
+asStatic: FALSE

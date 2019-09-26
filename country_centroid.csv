@@ -1,4 +1,4 @@
-iso2,latitude,longitude,Level,COUNTRY
+iso2,centlat,centlong,Level,NAME
 wd,15.454166,18.732207,3,World
 AD,42.546245,1.601554,5,Andorra
 AE,23.424076,53.847818,5,United Arab Emirates

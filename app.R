@@ -12,20 +12,6 @@ require(shinyjs)
 require(rmapshaper)
 #replace data scripts in both ui and server
 
-##AcledData from API to csv
-acledurl <- "https://api.acleddata.com/acled/read?terms=accept&limit=0&notes=school:OR:notes=college:OR:notes=university:OR:actor1=student:OR:actor1=teacher:OR:actor2=student:OR:actor2=teacher&year=2019"
-acleddata <- GET(acledurl)
-accleddata <- content(acleddata)
-accleddata <- accleddata$data
-accleddata <- bind_rows(accleddata)
-
-#format all vars then to week on line 25
-accleddata$event_date <- as.Date(accleddata$event_date, format = "%Y-%m-%d")
-accleddata$latitude <- as.numeric(as.character(accleddata$latitude))
-accleddata$longitude <- as.numeric(as.character(accleddata$longitude))
-accleddata$fatalities <- as.numeric(as.character(accleddata$fatalities))
-accleddata$event_date <- lubridate::floor_date(accleddata$event_date, "week")
-accleddata <- accleddata %>% filter(event_date >= as.Date('2019-07-01'))
 
 ###AIDR data
 aidr <- read.csv("Education insecurity tweet counts - Weekly by language and country.csv", na.strings = "")
@@ -42,11 +28,37 @@ aidr_content <- aidr_content %>% filter(Week.starting >= as.Date('2019-07-01'))
 
 aidr_content$group <- as.factor(1)
 
+aidr_content <- na.omit(aidr_content)
+
+
 
 #shapefiles
 world <- sf::read_sf(dsn ='TM_WORLD_BORDERS-0.3') %>% rmapshaper::ms_simplify()
 
-aidr_map_data <- world %>% left_join(aidr_content, by = c('ISO3' = 'Country.code'))
+aidr_map_data <- world %>% full_join(aidr_content, by = c('ISO3' = 'Country.code'))
+
+#aidr_map_data$Tweets[is.na(aidr_map_data$Tweets)] <- 0
+
+##AcledData from API to csv
+acledurl <- "https://api.acleddata.com/acled/read?terms=accept&limit=0&notes=school:OR:notes=college:OR:notes=university:OR:actor1=student:OR:actor1=teacher:OR:actor2=student:OR:actor2=teacher&year=2019"
+acleddata <- GET(acledurl)
+accleddata <- content(acleddata)
+accleddata <- accleddata$data
+accleddata <- bind_rows(accleddata)
+
+#format all vars then to week on line 25
+accleddata$event_date <- as.Date(accleddata$event_date, format = "%Y-%m-%d")
+accleddata$latitude <- as.numeric(as.character(accleddata$latitude))
+accleddata$longitude <- as.numeric(as.character(accleddata$longitude))
+accleddata$fatalities <- as.numeric(as.character(accleddata$fatalities))
+accleddata$event_date <- lubridate::floor_date(accleddata$event_date, "week")
+accleddata <- accleddata %>% filter(event_date >= as.Date('2019-07-01'))
+
+#centre data
+
+# centers <- read.csv('country_centroid.csv')
+# 
+# aidr_map_data <- aidr_map_data %>% left_join(centers, centers, by = 'NAME')
 
 #aidr_map_data <- aidr_map_data %>% select(NAME, LON, LAT, Week.starting, Language, Tweets, group)
                                
@@ -84,17 +96,19 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
                                                                                   style="z-index:500; background-color: rgba(255,255,255,1); border:0",
                                                                                   class = "panel panel-default",
                                                                                   draggable = FALSE,
-                                                                                  
-                                                                                  h4("Add Data Layers", size = 16, align = 'center'),
-                                                                                  radioButtons("datarad", label = "", choices = c('ACLED', 'AIDR'), inline = TRUE),
+                                                                                  pickerInput(
+                                                                                    inputId = "dropdown", 
+                                                                                    # label = "Select/deselect all + format selected", 
+                                                                                    choices = c("No Country Selected", names_sorted <- unique(aidr_map_data$NAME) %>% sort()), 
+                                                                                    options = list(`actions-box` = TRUE), 
+                                                                                    multiple = F),
                                                                                   
                                                                                   h4("Week and Tweet Breakdowns", size = 16, align = 'center'),
                                                                                   # switchInput(inputId = "switch", value = TRUE),
-                                                                                  
-                                                                                  
+                                                                                  h6("AIDR Education Insecurity Tweets"),
+                                                                                  textOutput(if("ctweets" == 0) 
+                                                                                    {"No Country Selected"} else {"ctweets"}),
                                                                                   sliderInput(ticks = TRUE, "daterange", "",
-                                                                                              
-                                                                                              
                                                                                               as.Date(min(accleddata$event_date)), 
                                                                                               as.Date(max(accleddata$event_date)),
                                                                                               value = min(accleddata$event_date), 
@@ -105,6 +119,10 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
                                                                                   plotOutput("plot", width = 400, height = 200),
                                                                                   
                                                                                   plotOutput("Barplot", width = 400, height = 400)
+                                                                                  
+                                                                                  
+                                                                                  
+                                                                                  
                                          ))
                                      ))),
                           tabPanel("AIDR Data", dataTableOutput("AIDR_dt")),
@@ -118,11 +136,6 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
 server <- function(input, output, session) {
   ##reactive statements
   
-  reactive_data_chrono <- reactive({
-    accleddata %>% 
-      filter(event_date == input$daterange[1]) 
-  })
-  
   reactive_plot_data <- reactive({
     aidr_map_data %>%
       filter(Week.starting == input$daterange[1])
@@ -131,53 +144,126 @@ server <- function(input, output, session) {
   
   reactive_bar <- reactive({
     aidr_map_data %>% 
-      filter(Week.starting <= input$daterange[1])
+      filter(Week.starting <= input$daterange[1],
+             NAME == input$dropdown)
+  })
+  
+  reactive_data_chrono <- reactive({
+    accleddata %>% 
+      filter(event_date == input$daterange[1]) 
+  })
+
+  reactive_tweet_country <- reactive({
+    aidr_map_data %>% 
+      filter(Week.starting == input$daterange[1],
+             NAME == input$dropdown)
   })
 
   
+  rc1 <- colorRampPalette(colors = c("red", "orange"), space = "Lab")(10)
+  
+  rc2 <- colorRampPalette(colors = c("orange", "yellow"), space = "Lab")(30)
+  
+  ## Make vector of colors for values larger than 0 (180 colors)
+  rc3 <- colorRampPalette(colors = c("yellow", "green"), space = "Lab")(75000)
+  
+  ## Combine the two color palettes
+  rampcols <- c(rc1, rc2, rc3)
+  
 
+  
+  
  
   #palette
-  pal <- colorNumeric("Blues", domain = aidr_map_data$Tweets)
+  # l
+  pal <- colorNumeric(palette = rampcols, 
+                      domain = aidr_map_data$Tweets, 
+                 #na.color = "#EA3546",
+                 alpha = TRUE)
   
-  #leaflet render
-  output$myheatmap <- renderLeaflet({
-    leaflet(aidr_map_data) %>%   
-      #   popup = ~paste("Country:", aidr_map_data$NAME,
-      #                  "<br/>",
-      #                  "Number of Tweets:", Tweets) %>%
-      addProviderTiles(provider = "OpenStreetMap.HOT") %>%
-      setView(30.7382679, 15.3489054, zoom = 3) %>% 
-      addMapPane("polygons", zIndex = 400) %>%
-      addLegend(pal = pal,
-                values = aidr_map_data$Tweets,
-                position = "topleft",
-                title = "Tweets")
-  })
-  
+  # sort(dexp(x = aidr_map_data$Tweets, log = TRUE))
+    
   #  observe statement needs session
   observe({
     leafletProxy("myheatmap", session, data = reactive_plot_data()) %>%
       clearShapes() %>%
       addPolygons(
+        popup = ~NAME,
         color = "#000",
         weight = 1,
         opacity = 0.2,
         options = pathOptions(pane = "polygons"),
-        fillColor = ~pal(aidr_map_data$Tweets))
+        fillColor = ~pal(reactive_plot_data()$Tweets))
     
-  })
-  
-  observe({
     leafletProxy("myheatmap", session, data = reactive_data_chrono()) %>%
       clearHeatmap() %>%
       addHeatmap(radius = 25, blur = 35)
+    
+  })
+  
+  proxy <- leafletProxy("myheatmap")
+  
+  #
+  
+  observe({
+    if(input$dropdown!="No Country Selected"){
+      #get the selected polygon and extract the label point 
+      selected_polygon <- subset(aidr_map_data, aidr_map_data$NAME==input$dropdown & aidr_map_data$Week.starting == input$daterange[1])
+      polygon_labelPt <- selected_polygon$geometry
+      
+      #remove any previously highlighted polygon
+      proxy %>% removeShape("highlighted_polygon")
+      
+      proxy %>% removeShape("highlighted_polygon_base")
+      
+      #center the view on the polygon 
+      
+      proxy %>% addPolygons(color="yellow",data=selected_polygon$geometry, layerId = "highlighted_polygon_base")
+      
+      #add a slightly thicker red polygon on top of the selected one
+      proxy %>% addPolylines(stroke=TRUE, weight = 3,color="red",data=selected_polygon, layerId = "highlighted_polygon")
+    }
+  })
+  
+  
+  # observeEvent({ # update the map markers and view on map clicks
+  #   if(input$dropdown !="No Country Selected"){
+  #     proxy %>% setView(lng = selected_polygon$Longitude,lat=selected_polygon$Latitude, zoom=5)
+  #   } else {
+  #     proxy %>% setView(lng = 30.7382679, lat =  15.3489054, zoom = 3)
+  #   }
+  # })
+  
+  
+  
+ # leaflet render
+  output$myheatmap <- renderLeaflet({
+    leaflet() %>%
+      enableTileCaching() %>%
+      addTiles(options = tileOptions(useCache = TRUE, crossOrigin = TRUE)) %>% 
+      #addProviderTiles(provider = "OpenStreetMap.HOT") %>%
+      addMapPane("polygons", zIndex = 399) %>%
+      setView(lng = 30.7382679, lat =  15.3489054, zoom = 3) %>% 
+      addLegend(pal = pal,
+                values = aidr_map_data$Tweets,
+                position = "topleft",
+                title = "Tweets")
+      
   })
   
 
+
+  # observe({
+  #   leafletProxy("myheatmap", session, data = reactive_data_chrono()) %>%
+  #       setView(lat = input$dropdown$centlat,
+  #               lng = input$dropdown$centlong,
+  #               zoom = input$dropdown$Level)
+  #   })
+
+
   #mybarplots   
   output$plot <- renderPlot({
-    ggplot(reactive_plot_data(), 
+    ggplot(reactive_tweet_country(), 
            aes(group, Tweets, fill = Language)) + 
       geom_col(position = "fill", width = 0.2) + 
       scale_fill_manual(values = c('#47A025', '#9A031E', '#064789'), 
@@ -218,7 +304,7 @@ server <- function(input, output, session) {
       ) + guides(fill = guide_legend(reverse = TRUE))
   })
   
-
+  
   
   output$AIDR_dt <- renderDataTable({aidr_map_data})
   
@@ -226,6 +312,12 @@ server <- function(input, output, session) {
   
   output$aidrimg <- renderImage({
     outfile <- tempfile(fileext = 'aidr_logo_300h.png')
+  })
+  
+  #rendered text
+  output$ctweets <- renderText({
+    paste('Country:', input$dropdown,
+          sum(reactive_tweet_country()$Tweets))
   })
 }
 
