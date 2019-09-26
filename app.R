@@ -30,12 +30,15 @@ aidr_content$group <- as.factor(1)
 
 aidr_content <- na.omit(aidr_content)
 
-
+#mutate another variable on the data for polygon values
 
 #shapefiles
 world <- sf::read_sf(dsn ='TM_WORLD_BORDERS-0.3') %>% rmapshaper::ms_simplify()
 
 aidr_map_data <- world %>% full_join(aidr_content, by = c('ISO3' = 'Country.code'))
+
+aidr_map_data <- aidr_map_data %>% group_by(Week.starting, NAME) %>% 
+  mutate(all_Tweets = sum(Tweets))
 
 #aidr_map_data$Tweets[is.na(aidr_map_data$Tweets)] <- 0
 
@@ -177,7 +180,7 @@ server <- function(input, output, session) {
   #palette
   # l
   pal <- colorNumeric(palette = rampcols, 
-                      domain = aidr_map_data$Tweets, 
+                      domain = aidr_map_data$all_Tweets, 
                  #na.color = "#EA3546",
                  alpha = TRUE)
   
@@ -193,7 +196,7 @@ server <- function(input, output, session) {
         weight = 1,
         opacity = 0.2,
         options = pathOptions(pane = "polygons"),
-        fillColor = ~pal(reactive_plot_data()$Tweets))
+        fillColor = ~pal(reactive_plot_data()$all_Tweets))
     
     leafletProxy("myheatmap", session, data = reactive_data_chrono()) %>%
       clearHeatmap() %>%
@@ -245,7 +248,7 @@ server <- function(input, output, session) {
       addMapPane("polygons", zIndex = 399) %>%
       setView(lng = 30.7382679, lat =  15.3489054, zoom = 3) %>% 
       addLegend(pal = pal,
-                values = aidr_map_data$Tweets,
+                values = aidr_map_data$all_Tweets,
                 position = "topleft",
                 title = "Tweets")
       
