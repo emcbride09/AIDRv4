@@ -104,21 +104,14 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
                                                                                   style="z-index:500; background-color: rgba(255,255,255,1); border:0",
                                                                                   class = "panel panel-default",
                                                                                   draggable = FALSE,
-                                                                                  h4("Select Country for Individual Statistics", align = 'center'),
+                                                                                  h4("Select Country for Individual Statistics"),
                                                                                   pickerInput(
                                                                                     inputId = "dropdown", 
                                                                                     # label = "Select/deselect all + format selected", 
                                                                                     choices = c("No Country Selected", unique(aidr_map_data$NAME) %>% sort()), 
                                                                                     options = list(`actions-box` = TRUE), 
                                                                                     multiple = F),
-                                                                                  
-                                                                                  h4("Week and Tweet Breakdowns", size = 16, align = 'center'),
-                                                                                  # switchInput(inputId = "switch", value = TRUE),
-                                                                                  h6("AIDR Education Insecurity Tweets"),
-                                                                                  textOutput(if("ctweets" == 0) 
-                                                                                    {"No Country Selected"} else {"ctweets"}),
-                                                                                  h6("ACLED Insecurity Events"),
-                                                                                  #textOutput(outputId = "Aclednum", {"acnum"}),
+                                                                                  h4("Select Week"),
                                                                                   sliderInput(ticks = TRUE, "daterange", "",
                                                                                               as.Date(min(accleddata$event_date)), 
                                                                                               as.Date(max(accleddata$event_date)),
@@ -126,11 +119,19 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
                                                                                               step = 7,
                                                                                               animate = animationOptions(interval = 1000, loop = TRUE),
                                                                                               width = "100%"
-                                                                                              ),
+                                                                                  ),
+                                                                                  h4("Country Statistics"),
+                                                                                  # switchInput(inputId = "switch", value = TRUE),
+                                                                                  h6("AIDR Education Insecurity Tweets"),
+                                                                                  span(textOutput(if("ctweets" == 0)
+                                                                                    {"No Country Selected"} else {"ctweets"}), style="color:red; font-size: 40px;"),
+                                                                                  h6("ACLED Insecurity Events"),
+                                                                                  span(textOutput({"acnum"}), style="color:red; font-size: 40px;"),
                                                                                   
-                                                                                  plotOutput("plot", width = 400, height = 200),
                                                                                   
-                                                                                  plotOutput("Barplot", width = 300, height = 300, inline = 'center')
+                                                                                         plotOutput("plot", width = 400, height = 150),
+                                                                                  column(width = 12, align = 'center',
+                                                                                         plotOutput("Barplot", width = 300, height = 250))
                                                                                   
                                                                                   
                                                                                   
@@ -334,8 +335,8 @@ server <- function(input, output, session) {
   
   #rendered text
   output$ctweets <- renderText({
-    paste('Country:', input$dropdown,
-          sum(reactive_tweet_country()$Tweets))
+    # paste('Country:', input$dropdown,
+          sum(reactive_tweet_country()$Tweets)
   })
   
   output$acnum <- renderText({

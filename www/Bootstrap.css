@@ -1,13 +1,20 @@
 .mainheader .logo{
-    font-family: "Gotham Bold";
+    font-family: "Gotham";
     font-weight: bold;
-    font-size: 24px;
+    font-size: 24;
 }
 
-.skin-blue .mainheader .logo {
-    background-color: "#1bb580"
+h4{
+    font-family: 'Gotham';
+    font-weight: 500;
 }
 
-h1{
-    text-decoration: underline;
+h6{
+    font-family: 'Gotham';
+    font-weight: 300;
+    font-size: 12;
+}
+
+acnum{
+    font-size: 20;
 }
