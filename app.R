@@ -75,6 +75,9 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
                           tabPanel("Interactive Map",
                                    bootstrapPage(
                                      div(class = "outer",
+                                         tags$head(
+                                           tags$link(rel = 'stylesheet', type = 'text/css', href = 'Bootstrap.css')
+                                         ),
                                          tags$style(type = "text/css", ".outer {position: fixed; top: 41px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0}"),
                                          #titlePanel(title = "Attacks Against Education - Data from AIDR and ACLED"),
                                          leafletOutput("myheatmap", height = "100%", width = "100%"),
@@ -83,7 +86,7 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
                                                        height = 300,
                                                        width = 200,
                                                        id = 'logop',
-                                                       id="controls",
+                                                       id="logos",
                                                        style="z-index:500; background-color: rgba(0,0,0,0); border:0;;",
                                                        class = "panel panel-default",
                                                        draggable = FALSE,
@@ -91,18 +94,21 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
                                                        img(src = 'hdx.png', height = 50, width = 150), 
                                                        img(src = 'aidr_logo_300h.png', height = 100, width = 190),
                                                        img(src = 'eaa.png', height = 80, width = 160)),
+                                         #controls panel
                                          fillPage(bootstrap = TRUE, absolutePanel(top = 45, 
                                                                                   right = 5,
-                                                                                  height = 500,
+                                                                                  bottom = 45,
+                                                                                  height = '100%',
                                                                                   width = 400,
                                                                                   id="controls",
                                                                                   style="z-index:500; background-color: rgba(255,255,255,1); border:0",
                                                                                   class = "panel panel-default",
                                                                                   draggable = FALSE,
+                                                                                  h4("Select Country for Individual Statistics", align = 'center'),
                                                                                   pickerInput(
                                                                                     inputId = "dropdown", 
                                                                                     # label = "Select/deselect all + format selected", 
-                                                                                    choices = c("No Country Selected", names_sorted <- unique(aidr_map_data$NAME) %>% sort()), 
+                                                                                    choices = c("No Country Selected", unique(aidr_map_data$NAME) %>% sort()), 
                                                                                     options = list(`actions-box` = TRUE), 
                                                                                     multiple = F),
                                                                                   
@@ -111,17 +117,20 @@ ui <- fillPage(navbarPage("AIDR and ACLED Map", id ="nav",
                                                                                   h6("AIDR Education Insecurity Tweets"),
                                                                                   textOutput(if("ctweets" == 0) 
                                                                                     {"No Country Selected"} else {"ctweets"}),
+                                                                                  h6("ACLED Insecurity Events"),
+                                                                                  #textOutput(outputId = "Aclednum", {"acnum"}),
                                                                                   sliderInput(ticks = TRUE, "daterange", "",
                                                                                               as.Date(min(accleddata$event_date)), 
                                                                                               as.Date(max(accleddata$event_date)),
                                                                                               value = min(accleddata$event_date), 
                                                                                               step = 7,
                                                                                               animate = animationOptions(interval = 1000, loop = TRUE),
-                                                                                              width = "100%"),
+                                                                                              width = "100%"
+                                                                                              ),
                                                                                   
                                                                                   plotOutput("plot", width = 400, height = 200),
                                                                                   
-                                                                                  plotOutput("Barplot", width = 400, height = 400)
+                                                                                  plotOutput("Barplot", width = 300, height = 300, inline = 'center')
                                                                                   
                                                                                   
                                                                                   
@@ -155,6 +164,12 @@ server <- function(input, output, session) {
     accleddata %>% 
       filter(event_date == input$daterange[1]) 
   })
+  
+  reactive_acnum <- reactive({
+    accleddata %>% 
+      filter(event_date == input$daterange[1],
+             country == input$dropdown) 
+  })
 
   reactive_tweet_country <- reactive({
     aidr_map_data %>% 
@@ -181,7 +196,7 @@ server <- function(input, output, session) {
   # l
   pal <- colorNumeric(palette = rampcols, 
                       domain = aidr_map_data$all_Tweets, 
-                 #na.color = "#EA3546",
+                 na.color = "#8AA1B1",
                  alpha = TRUE)
   
   # sort(dexp(x = aidr_map_data$Tweets, log = TRUE))
@@ -190,7 +205,7 @@ server <- function(input, output, session) {
   observe({
     leafletProxy("myheatmap", session, data = reactive_plot_data()) %>%
       clearShapes() %>%
-      addPolygons(
+      addPolygons(data = world,
         popup = ~NAME,
         color = "#000",
         weight = 1,
@@ -209,9 +224,9 @@ server <- function(input, output, session) {
   #
   
   observe({
-    if(input$dropdown!="No Country Selected"){
-      #get the selected polygon and extract the label point 
-      selected_polygon <- subset(aidr_map_data, aidr_map_data$NAME==input$dropdown & aidr_map_data$Week.starting == input$daterange[1])
+    if(input$dropdown!="No Country Selected" & input$daterange != is.na(input$daterange)){
+      #get the selected polygon and extract the label point;; & aidr_map_data$Week.starting == input$daterange[1]
+      selected_polygon <- subset(aidr_map_data, aidr_map_data$NAME==input$dropdown)
       polygon_labelPt <- selected_polygon$geometry
       
       #remove any previously highlighted polygon
@@ -321,6 +336,10 @@ server <- function(input, output, session) {
   output$ctweets <- renderText({
     paste('Country:', input$dropdown,
           sum(reactive_tweet_country()$Tweets))
+  })
+  
+  output$acnum <- renderText({
+    nrow(reactive_acnum())
   })
 }
 

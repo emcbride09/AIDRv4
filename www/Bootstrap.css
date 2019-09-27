@@ -1,0 +1,13 @@
+.mainheader .logo{
+    font-family: "Gotham Bold";
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.skin-blue .mainheader .logo {
+    background-color: "#1bb580"
+}
+
+h1{
+    text-decoration: underline;
+}
